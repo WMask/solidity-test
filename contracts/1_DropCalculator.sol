@@ -4,51 +4,75 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "hardhat/console.sol";
 
+
+struct Item {
+    string name;
+    uint count;
+}
+
+
 /**
  * @title Owner
  * @dev Set & change owner
  */
 contract DropCalculator {
 
-    address private owner;
-
-    // event for EVM logging
-    event OwnerSet(address indexed oldOwner, address indexed newOwner);
-
-    // modifier to check if caller is owner
-    modifier isOwner() {
-        // If the first argument of 'require' evaluates to 'false', execution terminates and all
-        // changes to the state and to Ether balances are reverted.
-        // This used to consume all gas in old EVM versions, but not anymore.
-        // It is often a good idea to use 'require' to check if functions are called correctly.
-        // As a second argument, you can also provide an explanation about what went wrong.
-        require(msg.sender == owner, "Caller is not owner");
-        _;
-    }
+    address internal owner;
+    string[] internal itemNames = ["Sword", "Dagger", "Bow", "Helmet", "Gloves", "Ring", "HP Potion", "MP Potion", "Apple"];
+    uint public dropRate;
 
     /**
      * @dev Set contract deployer as owner
      */
     constructor() {
-        console.log("Owner contract deployed by:", msg.sender);
-        owner = msg.sender; // 'msg.sender' is sender of current call, contract deployer for a constructor
-        emit OwnerSet(address(0), owner);
+        owner = msg.sender;
+        dropRate = 30; // 30%
     }
 
     /**
-     * @dev Change owner
-     * @param newOwner address of new owner
+     * @dev Change drop rate (0 - 100)
      */
-    function changeOwner(address newOwner) public isOwner {
-        emit OwnerSet(owner, newOwner);
-        owner = newOwner;
+    function setDropRate(uint newDropRate) public {
+        require(msg.sender == owner, "Caller is not owner");
+        require(newDropRate <= 100 , "Invalid drop rate");
+
+        dropRate = newDropRate;
     }
 
     /**
-     * @dev Return owner address 
-     * @return address of owner
+     * @dev Return dropped items
      */
-    function getOwner() external view returns (address) {
-        return owner;
+    function getDrop() external view returns (Item[] memory) {
+        Item[] memory items = new Item[](itemNames.length + 1);
+
+        uint itemsCount = 0;
+        uint goldRate = dropRate * 50;
+        uint goldCount = random(itemsCount) % goldRate;
+        if (goldCount > 0) {
+            items[itemsCount] = Item({ name: "Gold", count: goldCount });
+            itemsCount++;
+        }
+
+        for (uint i = 0; i < itemNames.length; i++) {
+            uint itemResult = random(itemsCount) % 100;
+            if (itemResult < dropRate) {
+                items[itemsCount] = Item({ name: itemNames[i], count: itemResult });
+                itemsCount++;
+            }
+        }
+
+        Item[] memory result = new Item[](itemsCount);
+        for (uint r = 0; r < itemsCount; r++) {
+            result[r] = items[r];
+        }
+
+        return result;
+    }
+
+    /**
+     * @dev Helper function that returns a big random integer
+     */
+    function random(uint seed) internal view returns(uint){
+       return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, seed)));
     }
 }
