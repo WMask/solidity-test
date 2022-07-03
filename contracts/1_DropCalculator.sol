@@ -23,6 +23,8 @@ contract DropCalculator {
     string[] internal itemNames = ["Sword", "Dagger", "Bow", "Helmet", "Gloves", "Ring", "HP Potion", "MP Potion", "Apple"];
     uint public dropRate;
 
+    event OnGetItems(Item[] items);
+
     /**
      * @dev Set contract deployer as owner
      */
@@ -44,7 +46,7 @@ contract DropCalculator {
     /**
      * @dev Return dropped items
      */
-    function getDrop() external view returns (Item[] memory) {
+    function getDrop() external {
         Item[] memory items = new Item[](itemNames.length + 1);
 
         uint itemsCount = 0;
@@ -68,7 +70,7 @@ contract DropCalculator {
             result[r] = items[r];
         }
 
-        return result;
+        emit OnGetItems(result);
     }
 
     /**
