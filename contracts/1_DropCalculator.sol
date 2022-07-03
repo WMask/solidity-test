@@ -5,6 +5,9 @@ pragma solidity >=0.7.0 <0.9.0;
 import "hardhat/console.sol";
 
 
+/**
+ * @title Item data
+ */
 struct Item {
     string name;
     uint count;
@@ -12,8 +15,7 @@ struct Item {
 
 
 /**
- * @title Owner
- * @dev Set & change owner
+ * @title Drop calculator
  */
 contract DropCalculator {
 
