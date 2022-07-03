@@ -58,7 +58,7 @@ contract DropCalculator {
         for (uint i = 0; i < itemNames.length; i++) {
             uint itemResult = random(itemsCount) % 100;
             if (itemResult < dropRate) {
-                items[itemsCount] = Item({ name: itemNames[i], count: itemResult });
+                items[itemsCount] = Item({ name: itemNames[i], count: 1 });
                 itemsCount++;
             }
         }
